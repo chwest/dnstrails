@@ -1,0 +1,60 @@
+#!/bin/bash
+function dnstrails() {
+  
+  if [[ -n $1 ]]; then 
+
+    until [[ -n $all_values ]]; do
+
+      api_selector=$(shuf -i 1-7 -n 1)
+    
+      case $api_selector in
+      
+        1)
+          api_key=''
+          ;;
+        
+        2)
+          api_key=''
+          ;;
+        
+        3)
+          api_key=''
+          ;;
+    
+        4)
+          api_key=''
+          ;;
+        
+        5)
+          api_key=''
+          ;;
+    
+        6)
+          api_key=''
+          ;;
+    
+        7)
+          api_key=''
+          ;;
+
+      esac
+
+      all_values=$(curl -s --request GET   --url https://api.securitytrails.com/v1/history/"$1"/dns/a --header "apikey: $api_key" | jq -r '.records[]')
+   
+    done
+
+    echo -e "\n$1 DNS History:\n"
+
+    (echo 'IP#Organization#First Seen#Last Seen#';(echo $all_values | sed -rn 's/\} \{/\}\n\{/gp' | jq -r '.values[0].ip';echo $all_values | sed -rn 's/\} \{/\}\n\{/gp' | jq -r '.organizations[0]?';echo $all_values | sed -rn 's/\} \{/\}\n\{/gp' | jq -r '.first_seen'; echo $all_values | sed -rn 's/\} \{/\}\n\{/gp' | jq -r '.last_seen') | pr -t4s#) | column -ts '#'
+    
+    echo 
+
+  else 
+
+    echo 'usage: dnstrails $domain'
+
+  fi
+
+}
+
+dnstrails $1
