@@ -18,7 +18,7 @@ pd.set_option('display.max_colwidth', None)
 for domain in sys.argv[1:]:
     print(' ')
     print("DNS History for {}".format(domain))
-    keys = ['E9D6SLLrqSRnUvuTZJxULGRpgKIA3OSV','bNuDNVlPZrUarkDrUYAvk56dEIHKLk2C','QUV4HNKIvLEohXYx0FyF7W58N48kmttt','c9oRKNyDa0r6hsrp9BDVJt966ANphDYz','zRc6AMhdkDlRVkLOPtj1laU0X7HpH7DE','R39whf0ICER9CHOcOJFGrxW1IymK4up9','qXdw0eNqhyYjlNUVYfPLYEW3Mm0P2WST']
+    keys = ['key','key','key','key','key','key','key']
     random_index = random.randint(0,len(keys)-1)
     key = keys[random_index]
     
