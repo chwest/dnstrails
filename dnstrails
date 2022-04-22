@@ -1,60 +1,46 @@
-#!/bin/bash
-function dnstrails() {
-  
-  if [[ -n $1 ]]; then 
+#!/usr/bin/python
+import json
+import requests
+import random
+import sys
+import pandas as pd
 
-    until [[ -n $all_values ]]; do
+## response = requests.get("https://www.receitaws.com.br/v1/cnpj/27865757000102")
+## data = json.loads(response.content.decode(response.encoding))
+## df = pd.DataFrame([data])
+## print(df)
 
-      api_selector=$(shuf -i 1-7 -n 1)
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+pd.set_option('display.width', None)
+pd.set_option('display.max_colwidth', None)
+
+for domain in sys.argv[1:]:
+    print(' ')
+    print("DNS History for {}".format(domain))
+    keys = ['E9D6SLLrqSRnUvuTZJxULGRpgKIA3OSV','bNuDNVlPZrUarkDrUYAvk56dEIHKLk2C','QUV4HNKIvLEohXYx0FyF7W58N48kmttt','c9oRKNyDa0r6hsrp9BDVJt966ANphDYz','zRc6AMhdkDlRVkLOPtj1laU0X7HpH7DE','R39whf0ICER9CHOcOJFGrxW1IymK4up9','qXdw0eNqhyYjlNUVYfPLYEW3Mm0P2WST']
+    random_index = random.randint(0,len(keys)-1)
+    key = keys[random_index]
     
-      case $api_selector in
-      
-        1)
-          api_key=''
-          ;;
+    header={'apikey': key}
+    url = "https://api.securitytrails.com/v1/history/{}/dns/a".format(domain)
+    response = requests.get(url, headers=header)
+    data = response.json()['records']
+    
+    for record in data:
+        first_seen = record['first_seen']
+        last_seen = record['last_seen']
+        organizations = record['organizations']
+        values = record['values']
+        #record['ips'] = []
+        for value in values:
+            value.pop('ip_count')
+            #record['ips'].append(value['ip'])
+            #value.pop('ip')
+        #record.pop('values')
+        record.pop('type')
         
-        2)
-          api_key=''
-          ;;
-        
-        3)
-          api_key=''
-          ;;
-    
-        4)
-          api_key=''
-          ;;
-        
-        5)
-          api_key=''
-          ;;
-    
-        6)
-          api_key=''
-          ;;
-    
-        7)
-          api_key=''
-          ;;
-
-      esac
-
-      all_values=$(curl -s --request GET   --url https://api.securitytrails.com/v1/history/"$1"/dns/a --header "apikey: $api_key" | jq -r '.records[]')
-   
-    done
-
-    echo -e "\n$1 DNS History:\n"
-
-    (echo 'IP#Organization#First Seen#Last Seen#';(echo $all_values | sed -rn 's/\} \{/\}\n\{/gp' | jq -r '.values[0].ip';echo $all_values | sed -rn 's/\} \{/\}\n\{/gp' | jq -r '.organizations[0]?';echo $all_values | sed -rn 's/\} \{/\}\n\{/gp' | jq -r '.first_seen'; echo $all_values | sed -rn 's/\} \{/\}\n\{/gp' | jq -r '.last_seen') | pr -t4s#) | column -ts '#'
-    
-    echo 
-
-  else 
-
-    echo 'usage: dnstrails $domain'
-
-  fi
-
-}
-
-dnstrails $1
+    df = pd.json_normalize(data, record_path=['values'], meta=['organizations', 'first_seen', 'last_seen'])
+    df = pd.DataFrame(df)
+    #df = df.loc[:, ~df.columns.isin(['values', 'type'])]
+    print(df.to_string(index=False))
